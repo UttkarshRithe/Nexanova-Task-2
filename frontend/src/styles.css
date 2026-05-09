@@ -1,0 +1,126 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-base: #0f172a;
+  --bg-card: #1e293b;
+  --bg-hover: #263348;
+  --bg-input: #2d3f55;
+  --accent: #7c3aed;
+  --accent-light: #a78bfa;
+  --accent-bg: rgba(124,58,237,0.15);
+  --color-green: #34d399;
+  --color-amber: #fbbf24;
+  --color-red: #f87171;
+  --color-blue: #60a5fa;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --border: #334155;
+}
+
+html, body { 
+  height: 100%; 
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  animation: fadeIn 0.2s ease-in-out;
+}
+
+::-webkit-scrollbar { 
+  width: 6px; 
+}
+
+::-webkit-scrollbar-track { 
+  background: var(--bg-base); 
+}
+
+::-webkit-scrollbar-thumb { 
+  background: var(--accent); 
+  border-radius: 3px; 
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.app-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: transform 0.15s, border-color 0.15s;
+}
+
+.app-card:hover {
+  transform: translateY(-1px);
+}
+
+.app-muted {
+  color: var(--text-muted);
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.role-admin {
+  background-color: rgba(124,58,237,0.2);
+  color: #a78bfa;
+}
+
+.role-trainer {
+  background-color: rgba(52,211,153,0.2);
+  color: #34d399;
+}
+
+.role-trainee {
+  background-color: rgba(96,165,250,0.2);
+  color: #60a5fa;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: var(--text-primary);
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+}
+
+.btn-secondary {
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  background-color: transparent;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.15s, transform 0.1s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-hover);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97);
+}

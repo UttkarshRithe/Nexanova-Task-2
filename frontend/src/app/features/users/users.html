@@ -1,0 +1,96 @@
+<mat-sidenav-container class="min-h-screen">
+  <mat-sidenav mode="side" opened style="background-color: transparent; border-right: none;">
+    <app-sidebar />
+  </mat-sidenav>
+
+  <mat-sidenav-content style="background-color: transparent;">
+    <app-navbar />
+
+    <div class="p-6 md:p-8">
+      <div class="flex items-end justify-between mb-6">
+        <div>
+          <div class="text-2xl font-bold mb-1">Users</div>
+          <div class="text-sm app-muted">Manage all registered accounts (ADMIN only)</div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <mat-form-field appearance="outline" class="w-48 mb-[-1.25em]">
+            <mat-label>Filter by Role</mat-label>
+            <mat-select [ngModel]="roleFilter()" (selectionChange)="onRoleChange($event.value)">
+              <mat-option value="ALL">ALL ROLES</mat-option>
+              <mat-option value="ADMIN">ADMIN</mat-option>
+              <mat-option value="TRAINER">TRAINER</mat-option>
+              <mat-option value="TRAINEE">TRAINEE</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <button class="btn-primary flex items-center h-10" (click)="openAddUserDialog()">
+            <mat-icon class="mr-1 text-[20px] h-[20px] w-[20px]">person_add</mat-icon>
+            Add User
+          </button>
+        </div>
+      </div>
+
+      <div class="app-card rounded-xl overflow-hidden p-0 border" style="border-color: var(--border);">
+        <div *ngIf="loading()" class="flex items-center justify-center gap-3 app-muted p-12">
+          <mat-spinner diameter="24"></mat-spinner>
+          Loading users...
+        </div>
+
+        <div *ngIf="!loading() && users().length === 0" class="app-muted text-sm text-center p-12">
+          No users found.
+        </div>
+
+        <table mat-table [dataSource]="users()" class="w-full" *ngIf="!loading() && users().length > 0">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold px-4">ID</th>
+            <td mat-cell *matCellDef="let row" class="px-4 text-sm">{{ row.id }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold px-4">Name</th>
+            <td mat-cell *matCellDef="let row" class="px-4 font-medium text-white">{{ row.name }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="email">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold px-4">Email</th>
+            <td mat-cell *matCellDef="let row" class="px-4 text-sm app-muted">{{ row.email }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="role">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold px-4">Role</th>
+            <td mat-cell *matCellDef="let row" class="px-4">
+              <span class="role-badge" [ngClass]="{
+                'role-admin': row.role === 'ADMIN',
+                'role-trainer': row.role === 'TRAINER',
+                'role-trainee': row.role === 'TRAINEE'
+              }">
+                {{ row.role }}
+              </span>
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="createdAt">
+            <th mat-header-cell *matHeaderCellDef class="font-semibold px-4">Joined</th>
+            <td mat-cell *matCellDef="let row" class="px-4 text-sm app-muted">{{ row.createdAt | date:'MMM d, y' }}</td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef class="text-right px-4 font-semibold">Actions</th>
+            <td mat-cell *matCellDef="let row" class="text-right px-4 space-x-1">
+              <button mat-icon-button (click)="editUser(row)" style="color: var(--color-blue);">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button (click)="deleteUser(row)" style="color: var(--color-red);">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns" class="hover:bg-[var(--bg-hover)] transition-colors"></tr>
+        </table>
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

@@ -1,0 +1,65 @@
+server:
+  port: 8089
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+
+      # ✅ ADD THIS CORS CONFIG
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      routes:
+        - id: user-auth-route
+          uri: lb://user-service
+          predicates:
+            - Path=/api/auth/**
+
+        - id: user-route
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+
+        - id: course-route
+          uri: lb://course-service
+          predicates:
+            - Path=/api/courses/**
+
+        - id: scheduling-route
+          uri: lb://scheduling-service
+          predicates:
+            - Path=/api/schedule/**
+
+        - id: enrollment-route
+          uri: lb://enrollment-service
+          predicates:
+            - Path=/api/enrollments/**
+
+        - id: timetable-route
+          uri: lb://timetable-service
+          predicates:
+            - Path=/api/timetable/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+jwt:
+  secret: YashTrainingManagementSystemSuperSecureKey12345
+  expiration: 86400000

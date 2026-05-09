@@ -1,0 +1,104 @@
+<div class="min-h-screen" style="background-color: var(--bg-base);">
+  <app-navbar />
+
+  <div class="p-6 md:p-8 space-y-6 max-w-7xl mx-auto">
+    <!-- HEADER -->
+    <div class="flex items-end justify-between py-2">
+      <div>
+        <div class="text-2xl font-bold mb-1">Student Dashboard</div>
+        <div class="text-sm app-muted">Your enrolled courses and active timetable</div>
+      </div>
+
+      <div class="flex items-center gap-4">
+        <mat-form-field appearance="outline" class="w-48 mb-[-1.25em]">
+          <mat-label>Load Student ID</mat-label>
+          <input matInput type="number" [value]="studentId()" (change)="setStudentId($any($event.target).value)" />
+          <mat-icon matPrefix class="app-muted mr-2">person</mat-icon>
+        </mat-form-field>
+        <button class="btn-primary h-10 px-4 flex items-center" (click)="load()" [disabled]="loading()">
+          <mat-icon class="mr-1 text-[20px] h-[20px] w-[20px]">refresh</mat-icon> Refresh Data
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading()" class="flex items-center gap-3 app-muted text-sm my-4">
+      <mat-spinner diameter="20"></mat-spinner>
+      Updating your dashboard...
+    </div>
+
+    <!-- MY COURSES -->
+    <div id="my-courses" class="pt-2">
+      <div class="font-bold text-lg mb-4 flex items-center gap-2">
+        <mat-icon style="color: var(--color-green);">menu_book</mat-icon> My Courses
+      </div>
+      
+      <div *ngIf="myCourses().length === 0" class="app-card p-8 text-center app-muted text-sm border-dashed">
+        You are not enrolled in any courses yet.
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" *ngIf="myCourses().length > 0">
+        <div class="app-card p-5 relative overflow-hidden flex flex-col justify-between items-start" *ngFor="let course of myCourses()">
+          <div class="absolute top-0 left-0 bottom-0 w-1.5" style="background-color: var(--accent);"></div>
+          <div class="w-full">
+            <div class="font-semibold text-lg mb-1" style="color: var(--text-primary);">{{ course.name }}</div>
+            <div class="text-sm app-muted mb-4 line-clamp-2 max-w-[90%]">{{ course.description || 'No description provided by instructor.' }}</div>
+          </div>
+          <div class="text-xs font-semibold px-2 py-1 rounded" style="background-color: var(--bg-hover); color: var(--text-secondary);">
+            Course ID: {{ course.id }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TIMETABLE PANE -->
+    <mat-card class="app-card p-6 mt-8" id="timetable-pdf">
+      <div class="flex items-center justify-between mb-5">
+        <div class="font-bold text-lg flex items-center gap-2">
+          <mat-icon style="color: var(--color-blue);">schedule</mat-icon> Weekly Timetable
+        </div>
+        <button mat-stroked-button (click)="printTimetable()" [disabled]="loading() || timetable().length === 0" 
+                class="hover:bg-[var(--accent-bg)] !border-[var(--accent)] !text-[var(--accent-light)] transition-colors">
+          <mat-icon class="mr-1">picture_as_pdf</mat-icon> Download PDF
+        </button>
+      </div>
+
+      <div *ngIf="timetable().length === 0" class="p-8 rounded-lg text-sm text-center border mt-2" 
+           style="background-color: var(--bg-hover); border-color: var(--border); color: var(--text-secondary);">
+        No timetable generated yet. Enter your Student ID above and click Refresh Data.
+      </div>
+
+      <div class="overflow-x-auto rounded-xl border mt-2" style="border-color: var(--border);" *ngIf="timetable().length > 0">
+        <table class="w-full border-collapse text-sm">
+          <thead>
+            <tr>
+              <th class="text-left p-4 uppercase tracking-wider text-xs font-semibold" style="background-color: var(--bg-hover); color: var(--text-secondary); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);">Day</th>
+              <th class="text-center p-3 font-medium text-xs whitespace-nowrap" style="background-color: var(--bg-hover); color: var(--text-secondary); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);" *ngFor="let slot of fixedSlots">
+                {{ slot.label }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let day of weekdays" class="group">
+              <td class="p-4 font-semibold uppercase tracking-wide text-xs" style="background-color: var(--bg-hover); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text-secondary);">
+                {{ dayLabels[day] }}
+              </td>
+              <td class="p-2 align-middle text-center" style="border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);" *ngFor="let slot of fixedSlots">
+                <div *ngIf="getSlotText(day, slot.start, slot.end) !== 'Empty'"
+                     class="w-full rounded-md h-12 text-xs flex items-center justify-center font-medium shadow-sm transition-transform hover:scale-[1.02]"
+                     style="background-color: var(--accent-bg); border: 1px solid var(--accent); color: var(--accent-light);">
+                  {{ getSlotText(day, slot.start, slot.end) }}
+                </div>
+                <div *ngIf="getSlotText(day, slot.start, slot.end) === 'Empty'"
+                     class="w-full rounded-md h-12 text-xs flex items-center justify-center font-medium opacity-50"
+                     style="background-color: transparent; border: 1px dashed var(--border); color: var(--text-muted);">
+                  Available
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </mat-card>
+
+  </div>
+</div>

@@ -1,0 +1,154 @@
+<mat-sidenav-container class="min-h-screen">
+  <mat-sidenav mode="side" opened style="background-color: transparent; border-right: none;">
+    <app-sidebar />
+  </mat-sidenav>
+
+  <mat-sidenav-content style="background-color: transparent;">
+    <app-navbar />
+
+    <div class="p-6 md:p-8 space-y-6">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <div class="text-2xl font-bold mb-1">Admin Dashboard</div>
+          <div class="text-sm app-muted">Overview of users, courses, and enrollments</div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <mat-form-field appearance="outline" class="w-56 mb-[-1.25em]">
+            <mat-label>Student ID (enrollments)</mat-label>
+            <input matInput type="number" [value]="selectedStudentId()" (change)="setStudentId($any($event.target).value)" />
+          </mat-form-field>
+
+          <button class="btn-secondary flex items-center h-10" (click)="refresh()">
+            <mat-icon class="mr-1 text-sm">refresh</mat-icon> Refresh
+          </button>
+        </div>
+      </div>
+
+      <div *ngIf="loading()" class="flex items-center gap-3 app-muted text-sm">
+        <mat-spinner diameter="20"></mat-spinner>
+        Loading dashboard...
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div class="app-card relative overflow-hidden p-6 flex flex-col pt-7">
+          <div class="absolute top-0 left-0 right-0 h-1" style="background-color: var(--accent);"></div>
+          <div class="flex justify-between items-start mb-2">
+            <div class="text-[12px] uppercase tracking-wider font-semibold app-muted">Total Users</div>
+            <mat-icon class="app-muted opacity-50" style="font-size: 20px; height: 20px; width: 20px;">group</mat-icon>
+          </div>
+          <div class="text-3xl font-bold" style="color: var(--accent-light);">{{ totalUsers() }}</div>
+        </div>
+
+        <div class="app-card relative overflow-hidden p-6 flex flex-col pt-7">
+          <div class="absolute top-0 left-0 right-0 h-1" style="background-color: var(--color-green);"></div>
+          <div class="flex justify-between items-start mb-2">
+            <div class="text-[12px] uppercase tracking-wider font-semibold app-muted">Total Courses</div>
+            <mat-icon class="app-muted opacity-50" style="font-size: 20px; height: 20px; width: 20px;">menu_book</mat-icon>
+          </div>
+          <div class="text-3xl font-bold" style="color: var(--color-green);">{{ totalCourses() }}</div>
+        </div>
+
+        <div class="app-card relative overflow-hidden p-6 flex flex-col pt-7">
+          <div class="absolute top-0 left-0 right-0 h-1" style="background-color: var(--color-amber);"></div>
+          <div class="flex justify-between items-start mb-2">
+            <div class="text-[12px] uppercase tracking-wider font-semibold app-muted">Total Enrollments</div>
+            <mat-icon class="app-muted opacity-50" style="font-size: 20px; height: 20px; width: 20px;">how_to_reg</mat-icon>
+          </div>
+          <div class="text-3xl font-bold" style="color: var(--color-amber);">{{ totalEnrollments() }}</div>
+          <div class="text-xs app-muted mt-2">For Student ID {{ selectedStudentId() }}</div>
+        </div>
+      </div>
+
+      <!-- CHARTS -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        <!-- Users Growth -->
+        <mat-card class="app-card p-6 lg:col-span-2">
+          <div class="font-bold text-lg mb-4">Users Growth</div>
+          <div class="relative w-full h-48 border-b border-l flex items-end pl-2 pb-2 gap-4"
+               style="border-color: var(--border);">
+            <ng-container *ngIf="lineChartData?.datasets?.[0]?.data as data">
+              <div *ngFor="let val of data; let i = index"
+                   class="relative group flex-1 h-full flex items-end justify-center">
+                <div class="w-full max-w-[40px] rounded-t-sm transition-all duration-300"
+                     style="background-color: var(--accent); min-height: 2px;"
+                     [style.height.%]="(($any(val) || 0) / 20) * 100">
+                </div>
+                <div class="absolute -bottom-6 text-xs app-muted w-full text-center truncate">
+                  {{ lineChartData?.labels?.[i] }}
+                </div>
+              </div>
+            </ng-container>
+            <div *ngIf="!lineChartData?.datasets?.[0]?.data"
+                 class="app-muted text-sm my-auto w-full text-center">
+              No data available
+            </div>
+          </div>
+          <div class="h-6"></div>
+        </mat-card>
+
+        <!-- Enrollment Trends -->
+        <mat-card class="app-card p-6">
+          <div class="font-bold text-lg mb-4">Enrollment Trends</div>
+          <div class="space-y-4">
+            <ng-container *ngIf="pieChartData?.datasets?.[0]?.data as data">
+              <div *ngFor="let val of data; let i = index">
+                <div class="flex justify-between text-sm mb-1">
+                  <span>{{ pieChartData?.labels?.[i] }}</span>
+                  <span class="font-medium">{{ val }}%</span>
+                </div>
+                <div class="w-full h-2 rounded-full overflow-hidden"
+                     style="background-color: var(--bg-hover);">
+                  <div class="h-full rounded-full"
+                       [style.width.%]="(val ?? 0)"
+                       [class]="i % 3 === 0 ? 'bg-purple-500' :
+                                (i % 3 === 1 ? 'bg-emerald-400' : 'bg-amber-400')">
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <div *ngIf="!pieChartData?.datasets?.[0]?.data"
+                 class="app-muted text-sm">
+              No trend data
+            </div>
+          </div>
+        </mat-card>
+
+        <!-- Course Popularity -->
+        <mat-card class="app-card p-6 lg:col-span-3">
+          <div class="flex justify-between items-center mb-1">
+            <div class="font-bold text-lg">Course Popularity</div>
+          </div>
+          <div class="text-xs app-muted mb-5">
+            Using modules-per-course as a proxy (no popularity API available).
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <ng-container *ngIf="barChartData?.datasets?.[0]?.data as data">
+              <div *ngFor="let val of data; let i = index">
+                <div class="flex justify-between text-sm mb-1">
+                  <span class="truncate pr-4">{{ barChartData?.labels?.[i] }}</span>
+                  <span class="font-medium" style="color: var(--accent-light);">{{ val }}</span>
+                </div>
+                <div class="w-full h-2.5 rounded-full overflow-hidden"
+                     style="background-color: var(--bg-hover);">
+                  <div class="h-full rounded-full"
+                       style="background-color: var(--accent);"
+                       [style.width.%]="(($any(val) || 0) / 10) * 100">
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <div *ngIf="!barChartData?.datasets?.[0]?.data"
+                 class="app-muted text-sm">
+              No course metrics
+            </div>
+          </div>
+        </mat-card>
+
+      </div>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

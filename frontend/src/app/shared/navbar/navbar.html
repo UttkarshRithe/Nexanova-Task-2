@@ -1,0 +1,29 @@
+<mat-toolbar class="w-full flex items-center justify-between px-4" style="background-color: var(--bg-card); border-bottom: 1px solid var(--border); height: 64px;">
+  <div class="font-semibold text-lg text-white flex items-center gap-2">
+    <mat-icon style="color: var(--accent)">school</mat-icon> 
+    Training Management System
+  </div>
+
+  <div class="flex items-center gap-4">
+    <div class="flex flex-col items-end leading-tight">
+      <div class="font-medium text-sm" *ngIf="email() as e">{{ e }}</div>
+    </div>
+    
+    <span *ngIf="role() as r" class="role-badge" [ngClass]="{
+      'role-admin': r === 'ADMIN',
+      'role-trainer': r === 'TRAINER',
+      'role-trainee': r === 'TRAINEE'
+    }">
+      {{ r }}
+    </span>
+
+    <button mat-icon-button (click)="toggleTheme()" aria-label="Toggle theme">
+      <mat-icon>dark_mode</mat-icon>
+    </button>
+
+    <button mat-stroked-button (click)="logout()">
+      <mat-icon class="mr-1">logout</mat-icon>
+      Logout
+    </button>
+  </div>
+</mat-toolbar>

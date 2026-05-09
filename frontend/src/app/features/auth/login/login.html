@@ -1,0 +1,61 @@
+<div class="min-h-screen flex items-center justify-center p-4" style="background-color: var(--bg-base);">
+  <mat-card class="w-full p-8" style="max-width: 420px; background-color: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+    
+    <div class="flex flex-col items-center justify-center mb-8 text-center">
+      <div class="h-14 w-14 rounded-2xl flex items-center justify-center mb-4 text-white" style="background-color: var(--accent);">
+        <mat-icon style="font-size: 32px; width: 32px; height: 32px;">school</mat-icon>
+      </div>
+      <h1 class="text-2xl font-bold tracking-tight mb-1" style="color: var(--text-primary);">Training Management</h1>
+      <p class="text-sm" style="color: var(--text-secondary);">Sign in to access your portal</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-5">
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Email Address</mat-label>
+        <input matInput type="email" formControlName="email" autocomplete="username" />
+        <mat-icon matPrefix class="mr-2 app-muted">email</mat-icon>
+        <mat-error *ngIf="form.controls['email'].touched && form.controls['email'].invalid">
+          Enter a valid email.
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field class="w-full" appearance="outline">
+        <mat-label>Password</mat-label>
+        <input
+          matInput
+          [type]="hidePassword ? 'password' : 'text'"
+          formControlName="password"
+          autocomplete="current-password"
+        />
+        <mat-icon matPrefix class="mr-2 app-muted">lock</mat-icon>
+        <button
+          type="button"
+          mat-icon-button
+          matSuffix
+          (click)="hidePassword = !hidePassword"
+          [attr.aria-label]="'Toggle password visibility'"
+          class="app-muted"
+        >
+          <mat-icon>{{ hidePassword ? 'visibility' : 'visibility_off' }}</mat-icon>
+        </button>
+        <mat-error *ngIf="form.controls['password'].touched && form.controls['password'].invalid">
+          Password is required.
+        </mat-error>
+      </mat-form-field>
+
+      <div class="pt-2">
+        <button class="w-full h-12 flex items-center justify-center font-medium rounded-lg text-white" style="background-color: var(--accent); transition: filter 0.15s, transform 0.1s;" type="submit" [disabled]="loading()" [style.opacity]="loading() ? '0.7' : '1'" [style.cursor]="loading() ? 'not-allowed' : 'pointer'" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='none'" onmousedown="if(!this.disabled) this.style.transform='scale(0.98)'" onmouseup="this.style.transform='none'">
+          <span *ngIf="!loading()">Login</span>
+          <span *ngIf="loading()" class="inline-flex items-center gap-2">
+            <mat-spinner diameter="20" style="--mdc-circular-progress-active-indicator-color: #fff;"></mat-spinner>
+            Signing in...
+          </span>
+        </button>
+      </div>
+
+      <div class="text-[11px] text-center mt-6 p-2 rounded" style="color: var(--text-muted); background-color: var(--bg-hover);">
+        API Gateway: <span class="font-mono">http://localhost:8089</span>
+      </div>
+    </form>
+  </mat-card>
+</div>

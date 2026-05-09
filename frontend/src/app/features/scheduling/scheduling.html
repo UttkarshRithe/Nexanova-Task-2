@@ -1,0 +1,156 @@
+<mat-sidenav-container class="min-h-screen">
+  <mat-sidenav mode="side" opened style="background-color: transparent; border-right: none;">
+    <app-sidebar />
+  </mat-sidenav>
+
+  <mat-sidenav-content style="background-color: transparent;">
+    <app-navbar />
+
+    <div class="p-6 md:p-8 space-y-6">
+
+      <!-- HEADER -->
+      <div class="flex items-end justify-between mb-2">
+        <div>
+          <div class="text-2xl font-bold mb-1">Scheduling</div>
+          <div class="text-sm app-muted">Create schedules and manage weekly timeslots</div>
+        </div>
+        <mat-icon class="text-3xl" style="color: var(--accent);">calendar_month</mat-icon>
+      </div>
+
+      <!-- FORM -->
+      <mat-card class="app-card p-6">
+        <form [formGroup]="scheduleForm" class="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Course Selection</mat-label>
+            <mat-select formControlName="courseId" (selectionChange)="onCourseChange()">
+              <mat-option *ngFor="let c of courses()" [value]="c.id">
+                <span class="font-medium text-white">{{ c.name }}</span> (ID: {{ c.id }})
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="w-full">
+            <mat-label>Week Start Date</mat-label>
+            <input matInput type="date" formControlName="weekStartDate" />
+            <mat-icon matSuffix class="app-muted mr-2 text-[20px]">event</mat-icon>
+          </mat-form-field>
+
+          <div class="flex items-center gap-3 pt-2" *ngIf="scheduleForm.get('courseId')?.value">
+            <button type="button" class="btn-secondary h-14 flex-1 text-sm font-medium"
+                    (click)="getSchedule()" [disabled]="!scheduleForm.get('courseId')?.value || loading()">
+              <mat-icon class="mr-1 align-bottom">search</mat-icon> Get Schedule
+            </button>
+            <button type="button" class="btn-primary h-14 flex-1 text-sm font-medium"
+                    (click)="createSchedule()" [disabled]="scheduleForm.invalid || loading()">
+              <mat-icon class="mr-1 align-bottom">add</mat-icon> Create New
+            </button>
+          </div>
+        </form>
+
+        <div *ngIf="errorMessage()" class="mt-4 p-4 rounded-lg flex items-center text-sm font-medium"
+             style="background-color: rgba(248,113,113,0.1); color: var(--color-red); border: 1px solid rgba(248,113,113,0.2);">
+          <mat-icon class="mr-2">error_outline</mat-icon>
+          {{ errorMessage() }}
+        </div>
+      </mat-card>
+
+      <!-- TIMETABLE & SCHEDULES -->
+      <mat-card class="app-card p-6">
+        <div class="flex items-center justify-between mb-5">
+          <div class="font-bold text-lg">Weekly Timetable</div>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold backdrop-blur"
+                style="background-color: var(--bg-input); color: var(--text-secondary);"
+                *ngIf="selectedScheduleId()">
+            Active Schedule ID: <span style="color: var(--accent-light);">{{ selectedScheduleId() }}</span>
+          </span>
+        </div>
+
+        <div *ngIf="loading()" class="flex items-center gap-3 app-muted py-4">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>Loading timetable...</span>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div class="p-4 rounded-lg text-sm text-center border mt-2"
+             style="background-color: var(--bg-hover); border-color: var(--border); color: var(--text-secondary);"
+             *ngIf="scheduleForm.get('courseId')?.value && schedules()?.length === 0 && hasSearched()">
+          No schedule exists for this week yet. Select a date and click "Create Schedule".
+        </div>
+
+        <div class="p-4 rounded-lg text-sm text-center border mt-2"
+             style="background-color: var(--bg-hover); border-color: var(--border); color: var(--text-secondary);"
+             *ngIf="!scheduleForm.get('courseId')?.value">
+          Please select a course above to view or manage its schedules.
+        </div>
+
+        <div class="p-4 rounded-lg text-sm text-center border mt-2"
+             style="background-color: var(--bg-hover); border-color: var(--border); color: var(--text-secondary);"
+             *ngIf="schedules().length > 0 && !selectedScheduleId()">
+          Please select a schedule from the list below to view and edit its timetable.
+        </div>
+
+        <!-- SCHEDULES LIST -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-5" *ngIf="schedules().length > 0">
+          <div *ngFor="let schedule of schedules()"
+               class="p-4 rounded-xl cursor-pointer transition-all duration-200"
+               [style.border]="selectedScheduleId() === schedule.id ? '1px solid var(--accent)' : '1px solid var(--border)'"
+               [style.backgroundColor]="selectedScheduleId() === schedule.id ? 'var(--accent-bg)' : 'var(--bg-card)'"
+               (click)="selectSchedule(schedule.id)">
+            <div class="flex flex-row justify-between items-center">
+              <div>
+                <div class="font-semibold text-white mb-0.5" [style.color]="selectedScheduleId() === schedule.id ? 'var(--accent-light)' : '#fff'">
+                  Schedule #{{ schedule.id }}
+                </div>
+                <div class="text-xs" [style.color]="selectedScheduleId() === schedule.id ? 'var(--text-primary)' : 'var(--text-muted)'">
+                  Starts: {{ schedule.weekStartDate | date:'mediumDate' }}
+                </div>
+              </div>
+              <button mat-icon-button class="opacity-50 hover:opacity-100 transition-opacity"
+                      style="color: var(--color-red);"
+                      (click)="deleteSchedule(schedule.id); $event.stopPropagation()">
+                <mat-icon>delete_outline</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GRID -->
+        <div class="overflow-x-auto rounded-xl border" style="border-color: var(--border);" *ngIf="scheduleExists() && selectedScheduleId()">
+          <table class="w-full border-collapse text-sm">
+            <thead>
+              <tr>
+                <th class="text-left p-4 uppercase tracking-wider text-xs font-semibold" style="background-color: var(--bg-hover); color: var(--text-secondary); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);">Day</th>
+                <th class="text-center p-3 font-medium text-xs whitespace-nowrap" style="background-color: var(--bg-hover); color: var(--text-secondary); border-bottom: 1px solid var(--border); border-right: 1px solid var(--border);" *ngFor="let slot of fixedSlots">
+                  {{ slot.label }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let day of weekdays" class="group">
+                <td class="p-4 font-semibold uppercase tracking-wide text-xs" style="background-color: var(--bg-hover); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text-secondary);">
+                  {{ dayLabels[day] }}
+                </td>
+                <td class="p-2 align-middle text-center" style="border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);" *ngFor="let slot of fixedSlots">
+                  <button
+                    class="w-full rounded-md h-12 text-xs transition-all duration-200 flex items-center justify-center font-medium"
+                    [style.backgroundColor]="isSlotFilled(day, slot.start, slot.end) ? 'var(--accent-bg)' : 'transparent'"
+                    [style.borderColor]="isSlotFilled(day, slot.start, slot.end) ? 'var(--accent)' : 'var(--border)'"
+                    [style.borderWidth]="'1px'"
+                    [style.borderStyle]="'solid'"
+                    [style.color]="isSlotFilled(day, slot.start, slot.end) ? 'var(--accent-light)' : 'var(--text-muted)'"
+                    (click)="assignSlot(day, slot.start, slot.end, slot.label)"
+                    onmouseover="if(!this.style.backgroundColor || this.style.backgroundColor === 'transparent') this.style.borderColor='var(--accent)'"
+                    onmouseout="if(!this.style.backgroundColor || this.style.backgroundColor === 'transparent') this.style.borderColor='var(--border)'"
+                  >
+                    {{ getSlotText(day, slot.start, slot.end) }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+      </mat-card>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

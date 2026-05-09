@@ -1,0 +1,68 @@
+<div class="h-full flex flex-col" style="background-color: var(--bg-card); border-right: 1px solid var(--border); width: 220px;">
+  <div class="px-4 py-6 border-b" style="border-color: var(--border);">
+    <div class="flex items-center gap-3">
+      <div class="h-8 w-8 rounded-lg flex items-center justify-center font-bold" style="background-color: var(--accent); color: #fff;">
+        TMS
+      </div>
+      <div class="font-semibold text-sm leading-tight text-white">Training<br/>Management</div>
+    </div>
+  </div>
+
+  <div class="flex-1 overflow-y-auto py-4">
+    <div class="px-4 py-2 text-xs uppercase tracking-wider app-muted font-medium mb-1">Navigation</div>
+
+    <nav class="flex flex-col gap-1 px-2">
+      <!-- ADMIN ROUTES -->
+      <a routerLink="/admin-dashboard" routerLinkActive="active" *ngIf="role() === 'ADMIN'" class="nav-item">
+        <mat-icon class="nav-icon">dashboard</mat-icon>
+        <span>Dashboard</span>
+      </a>
+
+      <a routerLink="/admin/users" routerLinkActive="active" *ngIf="role() === 'ADMIN'" class="nav-item">
+        <mat-icon class="nav-icon">group</mat-icon>
+        <span>Users</span>
+      </a>
+
+      <a routerLink="/admin/courses" routerLinkActive="active" *ngIf="role() === 'ADMIN'" class="nav-item">
+        <mat-icon class="nav-icon">menu_book</mat-icon>
+        <span>Courses</span>
+      </a>
+
+      <a routerLink="/admin/scheduling" routerLinkActive="active" *ngIf="role() === 'ADMIN'" class="nav-item">
+        <mat-icon class="nav-icon">calendar_month</mat-icon>
+        <span>Scheduling</span>
+      </a>
+
+      <a routerLink="/admin/enrollments" routerLinkActive="active" *ngIf="role() === 'ADMIN'" class="nav-item">
+        <mat-icon class="nav-icon">how_to_reg</mat-icon>
+        <span>Enrollments</span>
+      </a>
+
+      <!-- TRAINEE ROUTES -->
+      <a routerLink="/student-dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" *ngIf="role() === 'TRAINEE'" class="nav-item">
+        <mat-icon class="nav-icon">school</mat-icon>
+        <span>Dashboard</span>
+      </a>
+
+      <a routerLink="/student-dashboard" fragment="my-courses" routerLinkActive="active" *ngIf="role() === 'TRAINEE'" class="nav-item">
+        <mat-icon class="nav-icon">menu_book</mat-icon>
+        <span>My Courses</span>
+      </a>
+
+      <a routerLink="/timetable" routerLinkActive="active" *ngIf="role() === 'TRAINEE'" class="nav-item">
+        <mat-icon class="nav-icon">schedule</mat-icon>
+        <span>My Timetable</span>
+      </a>
+    </nav>
+  </div>
+  
+  <div class="p-4 border-t mt-auto" style="border-color: var(--border);">
+    <span *ngIf="role() as r" class="role-badge w-full text-center" [ngClass]="{
+      'role-admin': r === 'ADMIN',
+      'role-trainer': r === 'TRAINER',
+      'role-trainee': r === 'TRAINEE'
+    }">
+      {{ r }}
+    </span>
+  </div>
+</div>
